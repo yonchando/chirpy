@@ -24,12 +24,12 @@ func ValidateChirp() http.Handler {
 
 		if err != nil {
 			log.Println(err)
-			helper.RespsonseWithError(w, 500, "Something went wrong")
+			helper.ResponseWithError(w, 500, "Something went wrong")
 			return
 		}
 
 		if len(params.Body) > 140 {
-			helper.RespsonseWithError(w, 400, "Chirp is too long")
+			helper.ResponseWithError(w, 400, "Chirp is too long")
 			return
 		}
 

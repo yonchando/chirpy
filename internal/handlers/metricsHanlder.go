@@ -1,10 +1,14 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
+	"github.com/yonchando/chirpy/internal/helper"
 	"github.com/yonchando/chirpy/internal/models"
 )
 
@@ -41,11 +45,26 @@ func Reset(apiCfg *models.Config) http.Handler {
 
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
+		platform := os.Getenv("PLATFORM")
+
+		if strings.ToLower(platform) != "dev" {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("You don't have permissions."))
+			return
+		}
+
 		w.WriteHeader(http.StatusOK)
 
 		apiCfg.FileserverHits.Store(0)
 
-		w.Write([]byte("Reset hit...\n"))
+		err := apiCfg.DB.DeleteAllUser(context.Background())
+
+		if err != nil {
+			helper.ResponseWithError(w, http.StatusInternalServerError, "Something went wrong!")
+			return
+		}
+
+		w.Write([]byte("Reset"))
 	})
 
 }

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
 	"github.com/yonchando/chirpy/internal/database"
@@ -16,6 +17,7 @@ import (
 )
 
 func main() {
+	godotenv.Load()
 
 	dbUrl := os.Getenv("DB_URL")
 
