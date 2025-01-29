@@ -8,12 +8,13 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yonchando/chirpy/internal/configs"
 	"github.com/yonchando/chirpy/internal/database"
 	"github.com/yonchando/chirpy/internal/helper"
 	"github.com/yonchando/chirpy/internal/models"
 )
 
-func PostUserHanlder(cfg *models.Config) http.Handler {
+func PostUserHanlder(cfg *configs.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		type parameters struct {
 			Email string `json:"email"`
@@ -44,8 +45,8 @@ func PostUserHanlder(cfg *models.Config) http.Handler {
 		userParams := database.CreateUserParams{
 			ID:        uuid.New(),
 			Email:     params.Email,
-			CreatedAt: time.Time{},
-			UpdatedAt: time.Time{},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		}
 
 		var user database.User

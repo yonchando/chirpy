@@ -8,11 +8,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/yonchando/chirpy/internal/configs"
 	"github.com/yonchando/chirpy/internal/helper"
-	"github.com/yonchando/chirpy/internal/models"
 )
 
-func Metrics(apiCfg *models.Config) http.Handler {
+func Metrics(apiCfg *configs.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -40,7 +40,7 @@ func Metrics(apiCfg *models.Config) http.Handler {
 	})
 }
 
-func Reset(apiCfg *models.Config) http.Handler {
+func Reset(apiCfg *configs.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
