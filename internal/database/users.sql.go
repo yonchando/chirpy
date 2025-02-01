@@ -19,11 +19,11 @@ INSERT INTO users (
 `
 
 type CreateUserParams struct {
-	ID             uuid.UUID
-	Email          string
-	HashedPassword string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID             uuid.UUID `json:"id"`
+	Email          string    `json:"email"`
+	HashedPassword string    `json:"hashed_password"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -98,10 +98,10 @@ UPDATE users
 `
 
 type UpdateUserByIDParams struct {
-	Email          string
-	HashedPassword string
-	ID             uuid.UUID
-	UpdatedAt      time.Time
+	Email          string    `json:"email"`
+	HashedPassword string    `json:"hashed_password"`
+	ID             uuid.UUID `json:"id"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
 func (q *Queries) UpdateUserByID(ctx context.Context, arg UpdateUserByIDParams) error {

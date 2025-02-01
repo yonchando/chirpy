@@ -1,6 +1,9 @@
 -- name: GetAllChirps :many
 SELECT * FROM chirps order by created_at;
 
+-- name: GetAllChirpByAuthor :many
+SELECT * FROM chirps where user_id = $1;
+
 -- name: FindChirpByID :one
 SELECT * FROM chirps where id = $1;
 

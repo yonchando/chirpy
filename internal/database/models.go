@@ -12,27 +12,27 @@ import (
 )
 
 type Chirp struct {
-	ID        uuid.UUID
-	Body      string
-	UserID    uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uuid.UUID `json:"id"`
+	Body      string    `json:"body"`
+	UserID    uuid.UUID `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type RefreshToken struct {
-	Token     string
-	UserID    uuid.UUID
-	ExpiresAt time.Time
-	RevokedAt sql.NullTime
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Token     string       `json:"token"`
+	UserID    uuid.UUID    `json:"user_id"`
+	ExpiresAt time.Time    `json:"expires_at"`
+	RevokedAt sql.NullTime `json:"revoked_at"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
 }
 
 type User struct {
-	ID             uuid.UUID
-	Email          string
-	HashedPassword string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	IsChirpyRed    bool
+	ID             uuid.UUID `json:"id"`
+	Email          string    `json:"email"`
+	HashedPassword string    `json:"hashed_password"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	IsChirpyRed    bool      `json:"is_chirpy_red"`
 }

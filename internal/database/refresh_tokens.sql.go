@@ -20,12 +20,12 @@ INSERT INTO refresh_tokens (
 `
 
 type CreateRefreshTokenParams struct {
-	Token     string
-	UserID    uuid.UUID
-	ExpiresAt time.Time
-	RevokedAt sql.NullTime
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Token     string       `json:"token"`
+	UserID    uuid.UUID    `json:"user_id"`
+	ExpiresAt time.Time    `json:"expires_at"`
+	RevokedAt sql.NullTime `json:"revoked_at"`
+	CreatedAt time.Time    `json:"created_at"`
+	UpdatedAt time.Time    `json:"updated_at"`
 }
 
 func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error) {
@@ -74,9 +74,9 @@ UPDATE refresh_tokens
 `
 
 type RevokeRefreshTokenParams struct {
-	RevokedAt sql.NullTime
-	Token     string
-	UpdatedAt time.Time
+	RevokedAt sql.NullTime `json:"revoked_at"`
+	Token     string       `json:"token"`
+	UpdatedAt time.Time    `json:"updated_at"`
 }
 
 func (q *Queries) RevokeRefreshToken(ctx context.Context, arg RevokeRefreshTokenParams) error {

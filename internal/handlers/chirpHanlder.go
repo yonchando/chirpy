@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,25 +21,40 @@ func GetChirpHanlder(cfg *configs.Config) http.Handler {
 
 		w.Header().Set("Content-Type", "application/json")
 
-		chirps, err := cfg.DB.GetAllChirps(context.Background())
+		qAuthorID := r.URL.Query().Get("author_id")
+
+		qSort := r.URL.Query().Get("sort")
+
+		if qSort == "" || qSort != "desc" {
+			qSort = "asc"
+		}
+
+		var err error
+		var chirps []database.Chirp
+
+		if qAuthorID == "" {
+			chirps, err = cfg.DB.GetAllChirps(context.Background())
+		} else {
+			var authorID uuid.UUID
+			authorID, err = uuid.Parse(qAuthorID)
+			chirps, err = cfg.DB.GetAllChirpByAuthor(context.Background(), authorID)
+		}
 
 		if err != nil {
 			log.Println(err)
-			helper.ResponseWithError(w, http.StatusInternalServerError, "Created failed")
+			helper.ResponseWithError(w, http.StatusInternalServerError, "Something went wrong!")
 			return
 		}
 
-		c := make([]models.Chirp, len(chirps))
+		sort.Slice(chirps, func(i, j int) bool {
+			if qSort == "asc" {
+				return chirps[i].CreatedAt.Before(chirps[j].CreatedAt)
+			}
 
-		for i, v := range chirps {
+			return chirps[i].CreatedAt.After(chirps[j].CreatedAt)
+		})
 
-			item := models.Chirp{}
-			item.Map(v)
-
-			c[i] = item
-		}
-
-		helper.ResponseWithJson(w, http.StatusOK, c)
+		helper.ResponseWithJson(w, http.StatusOK, chirps)
 	})
 }
 

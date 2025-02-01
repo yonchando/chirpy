@@ -19,11 +19,11 @@ INSERT INTO chirps (
 `
 
 type CreateChirpParams struct {
-	ID        uuid.UUID
-	Body      string
-	UserID    uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uuid.UUID `json:"id"`
+	Body      string    `json:"body"`
+	UserID    uuid.UUID `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (q *Queries) CreateChirp(ctx context.Context, arg CreateChirpParams) (Chirp, error) {
@@ -78,6 +78,39 @@ func (q *Queries) FindChirpByID(ctx context.Context, id uuid.UUID) (Chirp, error
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getAllChirpByAuthor = `-- name: GetAllChirpByAuthor :many
+SELECT id, body, user_id, created_at, updated_at FROM chirps where user_id = $1
+`
+
+func (q *Queries) GetAllChirpByAuthor(ctx context.Context, userID uuid.UUID) ([]Chirp, error) {
+	rows, err := q.db.QueryContext(ctx, getAllChirpByAuthor, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Chirp
+	for rows.Next() {
+		var i Chirp
+		if err := rows.Scan(
+			&i.ID,
+			&i.Body,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getAllChirps = `-- name: GetAllChirps :many
