@@ -11,6 +11,7 @@ import (
 type Config struct {
 	FileserverHits atomic.Int32
 	DB             database.Queries
+	TokenSecret    string
 }
 
 func (cfg *Config) MiddlewareMetricsInc(next http.Handler) http.Handler {

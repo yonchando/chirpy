@@ -23,11 +23,17 @@ func (r *Route) Hanlders(config *configs.Config) {
 	mux.Handle("GET /admin/metrics", middleware.LogRequest(handlers.Metrics(config)))
 	mux.Handle("POST /admin/reset", middleware.LogRequest(handlers.Reset(config)))
 
-	mux.Handle("POST /api/users", middleware.LogRequest(handlers.PostUserHanlder(config)))
+	mux.Handle("POST /api/users", middleware.LogRequest(handlers.PostUserHandler(config)))
+	mux.Handle("PUT /api/users", middleware.LogRequest(handlers.PutUserHandler(config)))
+
+	mux.Handle("POST /api/login", middleware.LogRequest(handlers.LoginUserHandler(config)))
+	mux.Handle("POST /api/refresh", middleware.LogRequest(handlers.RefreshTokenHandler(config)))
+	mux.Handle("POST /api/revoke", middleware.LogRequest(handlers.RevokeRefreshTokenHandler(config)))
 
 	mux.Handle("GET /api/chirps", middleware.LogRequest(handlers.GetChirpHanlder(config)))
 	mux.Handle("GET /api/chirps/{chirpID}", middleware.LogRequest(handlers.ShowChirpHanlder(config)))
 	mux.Handle("POST /api/chirps", middleware.LogRequest(handlers.PostChirpHanlder(config)))
+	mux.Handle("DELETE /api/chirps/{chirpID}", middleware.LogRequest(handlers.DeleteChirpHanlder(config)))
 
 	mux.Handle("GET /api/healthz", middleware.LogRequest(handlers.Healthz()))
 

@@ -30,6 +30,7 @@ func main() {
 	apiCfg := configs.Config{}
 
 	apiCfg.DB = *dbQueries
+	apiCfg.TokenSecret = os.Getenv("TOKEN_SECRET")
 
 	mux := http.NewServeMux()
 

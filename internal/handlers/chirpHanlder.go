@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yonchando/chirpy/internal/auth"
 	"github.com/yonchando/chirpy/internal/configs"
 	"github.com/yonchando/chirpy/internal/database"
 	"github.com/yonchando/chirpy/internal/helper"
@@ -43,17 +44,35 @@ func GetChirpHanlder(cfg *configs.Config) http.Handler {
 
 func PostChirpHanlder(cfg *configs.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		type parameters struct {
-			Body   string    `json:"body"`
-			UserID uuid.UUID `json:"user_id"`
-		}
 
 		w.Header().Set("Content-Type", "application/json")
+
+		token, err := auth.GetBearerToken(r.Header)
+
+		if err != nil {
+			log.Println(err)
+			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		var userID uuid.UUID
+
+		userID, err = auth.ValidateJWT(token, cfg.TokenSecret)
+
+		if err != nil {
+			log.Println(err)
+			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		type parameters struct {
+			Body string `json:"body"`
+		}
 
 		decode := json.NewDecoder(r.Body)
 		params := parameters{}
 
-		err := decode.Decode(&params)
+		err = decode.Decode(&params)
 		if err != nil {
 			log.Println(err)
 			helper.ResponseWithError(w, http.StatusInternalServerError, "Something wrong with decode")
@@ -83,9 +102,9 @@ func PostChirpHanlder(cfg *configs.Config) http.Handler {
 		createParams := database.CreateChirpParams{
 			ID:        uuid.New(),
 			Body:      params.Body,
-			UserID:    params.UserID,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			UserID:    userID,
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
 		}
 
 		var chirp database.Chirp
@@ -105,13 +124,63 @@ func PostChirpHanlder(cfg *configs.Config) http.Handler {
 	})
 }
 
+func DeleteChirpHanlder(cfg *configs.Config) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Content-Type", "application/json")
+
+		token, err := auth.GetBearerToken(r.Header)
+
+		if err != nil {
+			log.Println(err)
+			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthenticate")
+			return
+		}
+
+		var userID uuid.UUID
+
+		userID, err = auth.ValidateJWT(token, cfg.TokenSecret)
+
+		if err != nil {
+			log.Println(err)
+			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthenticate")
+			return
+		}
+
+		chirpID, err := uuid.Parse(r.PathValue("chirpID"))
+
+		var chirp database.Chirp
+		chirp, err = cfg.DB.FindChirpByID(context.Background(), chirpID)
+
+		if err != nil {
+			log.Println(err)
+			helper.ResponseWithError(w, http.StatusNotFound, "Chirp not found.")
+			return
+		}
+
+		if chirp.UserID != userID {
+			helper.ResponseWithError(w, http.StatusForbidden, "Unauthorizate")
+			return
+		}
+
+		err = cfg.DB.DeleteChirpByID(context.Background(), chirpID)
+
+		if err != nil {
+			log.Println(err)
+			helper.ResponseWithError(w, http.StatusInternalServerError, "Something went wrong!.")
+			return
+		}
+
+		helper.ResponseWithJson(w, http.StatusNoContent, "")
+
+	})
+}
+
 func ShowChirpHanlder(cfg *configs.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		chirpID := r.PathValue("chirpID")
-
-		id, err := uuid.Parse(chirpID)
+		chirpID, err := uuid.Parse(r.PathValue("chirpID"))
 
 		if err != nil {
 			log.Println(err)
@@ -120,7 +189,7 @@ func ShowChirpHanlder(cfg *configs.Config) http.Handler {
 		}
 
 		var chirp database.Chirp
-		chirp, err = cfg.DB.FindChirpByID(context.Background(), id)
+		chirp, err = cfg.DB.FindChirpByID(context.Background(), chirpID)
 
 		if err != nil {
 			log.Println(err)

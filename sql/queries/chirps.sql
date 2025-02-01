@@ -9,5 +9,8 @@ INSERT INTO chirps (
     id, body, user_id, created_at, updated_at
 ) VALUES ($1,$2,$3,$4,$5) RETURNING *;
 
+-- name: DeleteChirpByID :exec
+DELETE FROM chirps WHERE id = $1;
+
 -- name: DeleteAllChirp :exec
 truncate table chirps cascade;
