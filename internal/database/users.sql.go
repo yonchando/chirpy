@@ -15,7 +15,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
     id, email, hashed_password, created_at, updated_at
-) VALUES ( $1, $2, $3, $4, $5 ) RETURNING id, email, hashed_password, created_at, updated_at
+) VALUES ( $1, $2, $3, $4, $5 ) RETURNING id, email, hashed_password, created_at, updated_at, is_chirpy_red
 `
 
 type CreateUserParams struct {
@@ -41,6 +41,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.HashedPassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
@@ -55,7 +56,7 @@ func (q *Queries) DeleteAllUser(ctx context.Context) error {
 }
 
 const findUserByEmail = `-- name: FindUserByEmail :one
-SELECT id, email, hashed_password, created_at, updated_at FROM users where lower(email) = lower($1)
+SELECT id, email, hashed_password, created_at, updated_at, is_chirpy_red FROM users where lower(email) = lower($1)
 `
 
 func (q *Queries) FindUserByEmail(ctx context.Context, lower string) (User, error) {
@@ -67,12 +68,13 @@ func (q *Queries) FindUserByEmail(ctx context.Context, lower string) (User, erro
 		&i.HashedPassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
 
 const findUserByID = `-- name: FindUserByID :one
-SELECT id, email, hashed_password, created_at, updated_at FROM users where id = $1
+SELECT id, email, hashed_password, created_at, updated_at, is_chirpy_red FROM users where id = $1
 `
 
 func (q *Queries) FindUserByID(ctx context.Context, id uuid.UUID) (User, error) {
@@ -84,6 +86,7 @@ func (q *Queries) FindUserByID(ctx context.Context, id uuid.UUID) (User, error) 
 		&i.HashedPassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
@@ -108,5 +111,14 @@ func (q *Queries) UpdateUserByID(ctx context.Context, arg UpdateUserByIDParams) 
 		arg.ID,
 		arg.UpdatedAt,
 	)
+	return err
+}
+
+const updateUsertoChirpRed = `-- name: UpdateUsertoChirpRed :exec
+UPDATE users SET is_chirpy_red = true WHERE id = $1
+`
+
+func (q *Queries) UpdateUsertoChirpRed(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, updateUsertoChirpRed, id)
 	return err
 }

@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -23,6 +25,26 @@ func TestCheckPasswordHash(t *testing.T) {
 	}
 }
 
+func TestGetAPIKey(t *testing.T) {
+
+	apiKey := os.Getenv("POLKA_KEY")
+
+	headers := http.Header{}
+
+	headers.Set("Authorization", fmt.Sprintf("ApiKey %s", apiKey))
+
+	token, err := GetAPIKey(headers)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if token != apiKey {
+		t.Errorf("Expected %s, got %s", apiKey, token)
+	}
+
+}
+
 func TestGetBearerToken(t *testing.T) {
 	headers := http.Header{}
 
@@ -31,12 +53,13 @@ func TestGetBearerToken(t *testing.T) {
 	token, err := GetBearerToken(headers)
 
 	if err != nil {
-		t.Errorf("Expected token, got %v", err)
+		t.Error(err)
 	}
 
 	if token != "token" {
 		t.Errorf("Expected token, got %v", token)
 	}
+
 }
 
 func TestMakeJWT(t *testing.T) {
@@ -55,6 +78,7 @@ func TestMakeJWT(t *testing.T) {
 	if ss == "" {
 		t.Errorf("Expect return token")
 	}
+
 }
 
 func TestValidateJWT(t *testing.T) {
@@ -80,6 +104,7 @@ func TestValidateJWT(t *testing.T) {
 	if id != cases.ID {
 		t.Errorf("Expect %v to match %v", id, cases.ID)
 	}
+
 }
 
 func TestMakeRefreshToken(t *testing.T) {
@@ -88,4 +113,5 @@ func TestMakeRefreshToken(t *testing.T) {
 	if refreh_token == "" || err != nil {
 		t.Error("Failed to generate refresh token")
 	}
+
 }

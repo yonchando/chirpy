@@ -133,7 +133,7 @@ func DeleteChirpHanlder(cfg *configs.Config) http.Handler {
 
 		if err != nil {
 			log.Println(err)
-			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthenticate")
+			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 
@@ -143,7 +143,7 @@ func DeleteChirpHanlder(cfg *configs.Config) http.Handler {
 
 		if err != nil {
 			log.Println(err)
-			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthenticate")
+			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 
@@ -159,7 +159,7 @@ func DeleteChirpHanlder(cfg *configs.Config) http.Handler {
 		}
 
 		if chirp.UserID != userID {
-			helper.ResponseWithError(w, http.StatusForbidden, "Unauthorizate")
+			helper.ResponseWithError(w, http.StatusForbidden, "Unauthorized")
 			return
 		}
 
@@ -202,5 +202,56 @@ func ShowChirpHanlder(cfg *configs.Config) http.Handler {
 		c.Map(chirp)
 
 		helper.ResponseWithJson(w, 200, c)
+	})
+}
+
+func PostWebHook(cfg *configs.Config) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		apiKey, err := auth.GetAPIKey(r.Header)
+
+		if err != nil || apiKey != cfg.PolkaKey {
+			helper.ResponseWithError(w, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+
+		type parameters struct {
+			Event string `json:"event"`
+			Data  struct {
+				UserID string `json:"user_id"`
+			} `json:"data"`
+		}
+
+		decode := json.NewDecoder(r.Body)
+		params := parameters{}
+
+		err = decode.Decode(&params)
+		if err != nil {
+			log.Println(err)
+			helper.ResponseWithError(w, http.StatusInternalServerError, "Something went wrong!.")
+			return
+		}
+
+		if params.Event != "user.upgraded" {
+			helper.ResponseWithJson(w, http.StatusNoContent, "")
+			return
+		}
+
+		userId, err := uuid.Parse(params.Data.UserID)
+		if err != nil {
+			log.Println(err)
+			helper.ResponseWithJson(w, http.StatusNoContent, "")
+			return
+		}
+
+		_, err = cfg.DB.FindUserByID(context.Background(), userId)
+		if err != nil {
+			helper.ResponseWithError(w, http.StatusNotFound, "User not found.")
+			return
+		}
+
+		cfg.DB.UpdateUsertoChirpRed(context.Background(), userId)
+
+		helper.ResponseWithJson(w, http.StatusNoContent, "")
 	})
 }

@@ -12,6 +12,7 @@ type Config struct {
 	FileserverHits atomic.Int32
 	DB             database.Queries
 	TokenSecret    string
+	PolkaKey       string
 }
 
 func (cfg *Config) MiddlewareMetricsInc(next http.Handler) http.Handler {

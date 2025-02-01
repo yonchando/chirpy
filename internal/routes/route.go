@@ -33,6 +33,9 @@ func (r *Route) Hanlders(config *configs.Config) {
 	mux.Handle("GET /api/chirps", middleware.LogRequest(handlers.GetChirpHanlder(config)))
 	mux.Handle("GET /api/chirps/{chirpID}", middleware.LogRequest(handlers.ShowChirpHanlder(config)))
 	mux.Handle("POST /api/chirps", middleware.LogRequest(handlers.PostChirpHanlder(config)))
+
+	mux.Handle("POST /api/polka/webhooks", middleware.LogRequest(handlers.PostWebHook(config)))
+
 	mux.Handle("DELETE /api/chirps/{chirpID}", middleware.LogRequest(handlers.DeleteChirpHanlder(config)))
 
 	mux.Handle("GET /api/healthz", middleware.LogRequest(handlers.Healthz()))

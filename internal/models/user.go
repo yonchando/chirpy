@@ -16,6 +16,7 @@ import (
 type User struct {
 	ID           uuid.UUID `json:"id"`
 	Email        string    `json:"email"`
+	IsChirpRed   bool      `json:"is_chirpy_red"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	Token        string    `json:"token,omitempty"`
@@ -55,6 +56,7 @@ func (u *User) Authenticate(cfg *configs.Config, email, password string) (databa
 func (u *User) Setter(user database.User) {
 	u.ID = user.ID
 	u.Email = user.Email
+	u.IsChirpRed = user.IsChirpyRed
 	u.CreatedAt = user.CreatedAt
 	u.UpdatedAt = user.UpdatedAt
 }

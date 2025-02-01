@@ -40,6 +40,18 @@ func GetBearerToken(headers http.Header) (string, error) {
 	return strings.TrimSpace(token[1]), nil
 }
 
+func GetAPIKey(headers http.Header) (string, error) {
+	authorization := headers.Get("Authorization")
+
+	if authorization == "" {
+		return "", errors.New("Authorization not exists")
+	}
+
+	token := strings.Split(authorization, "ApiKey ")
+
+	return strings.TrimSpace(token[1]), nil
+}
+
 func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
 
 	claim := &jwt.RegisteredClaims{

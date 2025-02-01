@@ -31,6 +31,7 @@ func main() {
 
 	apiCfg.DB = *dbQueries
 	apiCfg.TokenSecret = os.Getenv("TOKEN_SECRET")
+	apiCfg.PolkaKey = os.Getenv("POLKA_KEY")
 
 	mux := http.NewServeMux()
 
